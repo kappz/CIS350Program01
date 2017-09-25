@@ -1,7 +1,7 @@
 /*
 Author: Peter O'Donohue
 Creation Date: 09/18/17
-Modification Date: 09/21/17
+Modification Date: 09/23/17
 Description: FILL IN
 */
 
@@ -52,15 +52,16 @@ class Graph
 public:
 	Graph(int size); // creates an empty graph with size vertices
 	void fillGraph(); // fills in the graph from cin
+	void fillVector(vector<char>& order);
 	void printGraph(); // prints the graph (for debugging only)
 	int maxCover(vector<char> order); // returns the maxCover for the
-										  // ordering order
+									  // ordering order
 	int cover(char vertex, vector<char> order); // returns the cover size for vertex
 private:
 	Matrix<char> adj;
 };
 
-Graph::Graph(int size = 3)
+Graph::Graph(int size)
 {
 	adj.resize(size, size);
 	for (int i = 0; i < size; ++i)
@@ -71,20 +72,37 @@ Graph::Graph(int size = 3)
 }
 void Graph::fillGraph()
 {
+	int row = 0;
 	int numAdj = 0;
-	int tempRow = 0;
-	while (adj[tempRow][0] != ' ')
-		++tempRow;
-	cout << "Enter num adj: ";
-	cin >> numAdj;
-	adj[tempRow].resize(numAdj);
-	for (int i = 0; i < numAdj; ++i)
+	int numVertice = 0;
+	char vertex = ' ';
+	string adjacent = " ";
+//	cout << "Num Vertices: ";
+	cin >> numVertice;
+	adj.resize(numVertice, numVertice);
+	for (int i = 0; i < numVertice; ++i)
 	{
-		cout << "Enter adjacent: ";
-		cin >> adj[tempRow][i];
+//		cout << "Enter vertex, num of adj vertices, and adj vertices: ";
+		cin >> vertex >> numAdj >> adjacent;
+		vertex = toupper(vertex);
+		transform(adjacent.begin(), adjacent.end(), adjacent.begin(), ::toupper);
+		adj[row][0] = vertex;
+		adj[row].resize(numAdj + 1);
+		for (int i = 1; i <= numAdj; ++i)
+		{
+			adj[row][i] = adjacent.at(i - 1);
+		}
+		++row;
 	}
 }
 
+void Graph::fillVector(vector<char>& order)
+{
+	for (int i = 0; i < adj.numrows(); ++i)
+	{
+		order.push_back(adj[i][0]);
+	}
+}
 void Graph::printGraph()
 {
 	for (int i = 0; i < adj.numrows(); ++i)
@@ -109,46 +127,70 @@ int Graph::maxCover(vector<char> order)
 	}
 	return max;
 }
-int Graph::cover(char Vertex, vector<char> order)
+int Graph::cover(char vertex, vector<char> order)
 {
 	int cover = 0;
-
+	int tempCover = 0;
+	int adjRow = 0;
+	int orderIndexOne = 0;
+	int orderIndexTwo = 0;
+	while (adj[adjRow][0] != vertex)
+	{
+		++adjRow;
+	}
+	for (int i = 1; i < adj[adjRow].size(); ++i)
+	{
+		while (order[orderIndexOne] != vertex)
+			++orderIndexOne;
+		while (order[orderIndexTwo] != adj[adjRow][i])
+			++orderIndexTwo;
+		tempCover = abs(orderIndexTwo - orderIndexOne);
+		if (tempCover > cover)
+			cover = tempCover;
+		orderIndexOne = 0;
+		orderIndexTwo = 0;
+	}
 	return cover;
 }
 int main()
 {
+	int maxCover = 0;
+	int minMaxCover = 27;
 	int numGraphs = 0;
-	int numVertex = 0;
-	char letter = ' ';
-	vector<int> maxCover;
 	vector<char> perm;
-	Matrix<char> maxOrder;
-	cout << "Input number of graphs: ";
+	vector<char> order;
+	Graph foo(0);
+//	cout << "Input number of graphs: ";
 	cin >> numGraphs;
-	maxOrder.resize(numGraphs, numGraphs);
 	for (int i = 0; i < numGraphs; ++i)
 	{
-		cout << "Number of vertex's: ";
-		cin >> numVertex;
-		Graph foo(numVertex);
-		foo.printGraph();
-			for (int j = 0; j < numVertex; ++j)
+		foo.fillGraph();
+		foo.fillVector(perm);
+		sort(perm.begin(), perm.end());
+		do
+		{
+			maxCover = foo.maxCover(perm);
+			if (maxCover < minMaxCover)
 			{
-				cout << "Enter row letter: ";
-				cin >> letter;
-				toupper(letter);
-				perm.push_back(letter);
-				foo.fillGraph();
+				minMaxCover = maxCover;
+				order = perm;
 			}
-			foo.printGraph();
-			sort(perm.begin(), perm.end());
-			do
+			else if (maxCover = minMaxCover)
 			{
+				if (perm < order)
+					order = perm;
+			}
 
-				
-			} while (next_permutation(perm.begin(), perm.end()));
+		} while (next_permutation(perm.begin(), perm.end()));
+
+		for (int i = 0; i < order.size(); ++i)
+			cout << order[i] << " ";
+		cout << minMaxCover << endl;
+		maxCover = 0;
+		minMaxCover = 27;
+		order.clear();
+		perm.clear();
 	}
-	cout << endl;
 	system("pause");
 	return 0;
 }
