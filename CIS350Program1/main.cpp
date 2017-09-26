@@ -1,7 +1,7 @@
 /*
 Author: Peter O'Donohue
 Creation Date: 09/18/17
-Modification Date: 09/23/17
+Modification Date: 09/25/17
 Description: FILL IN
 */
 
@@ -9,6 +9,7 @@ Description: FILL IN
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -51,7 +52,8 @@ class Graph
 {
 public:
 	Graph(int size); // creates an empty graph with size vertices
-	void fillGraph(); // fills in the graph from cin
+	void fillGraph(ifstream& inputFile); // fills in the graph from cin
+	string removeSpaces(string input);
 	void fillVector(vector<char>& order);
 	void printGraph(); // prints the graph (for debugging only)
 	int maxCover(vector<char> order); // returns the maxCover for the
@@ -63,36 +65,49 @@ private:
 
 Graph::Graph(int size)
 {
-	adj.resize(size, size);
-	for (int i = 0; i < size; ++i)
-		for (int j = 0; j < size; ++j)
-		{
-			adj[i][j] = ' ';
-		}
+	if (size < 1)
+		size = 1;
+	else if (size > 26)
+		size = 26;
+	else
+		adj.resize(size, size);
+		for (int i = 0; i < size; ++i)
+			for (int j = 0; j < size; ++j)
+			{
+				adj[i][j] = '?';
+			}
 }
-void Graph::fillGraph()
+void Graph::fillGraph(ifstream& inputFile)
 {
-	int row = 0;
-	int numAdj = 0;
-	int numVertice = 0;
+	int numAdjacent = 0;
 	char vertex = ' ';
-	string adjacent = " ";
-//	cout << "Num Vertices: ";
-	cin >> numVertice;
-	adj.resize(numVertice, numVertice);
-	for (int i = 0; i < numVertice; ++i)
+	string adjacencies = "";
+
+	switch (adj.numrows())
 	{
-//		cout << "Enter vertex, num of adj vertices, and adj vertices: ";
-		cin >> vertex >> numAdj >> adjacent;
+	case 1:
+		cin >> vertex >> numAdjacent;
 		vertex = toupper(vertex);
-		transform(adjacent.begin(), adjacent.end(), adjacent.begin(), ::toupper);
-		adj[row][0] = vertex;
-		adj[row].resize(numAdj + 1);
-		for (int i = 1; i <= numAdj; ++i)
+		adj[0][0] = vertex;
+		break;
+
+	default:
+		for (int i = 0; i < adj.numrows(); ++i)
 		{
-			adj[row][i] = adjacent.at(i - 1);
+			cin >> vertex >> numAdjacent >> adjacencies;
+			if (numAdjacent >= adj.numrows())
+				numAdjacent = adj.numrows() - 1;
+
+			vertex = toupper(vertex);
+			transform(adjacencies.begin(), adjacencies.end(), adjacencies.begin(), ::toupper);
+			adj[i].resize(numAdjacent + 1);
+			adj[i][0] = vertex;
+			for (int j = 0; j < numAdjacent; ++j)
+			{
+				adj[i][j + 1] = adjacencies.at(j);
+			}
 		}
-		++row;
+		break;
 	}
 }
 
@@ -129,9 +144,9 @@ int Graph::maxCover(vector<char> order)
 }
 int Graph::cover(char vertex, vector<char> order)
 {
+	int adjRow = 0;
 	int cover = 0;
 	int tempCover = 0;
-	int adjRow = 0;
 	int orderIndexOne = 0;
 	int orderIndexTwo = 0;
 	while (adj[adjRow][0] != vertex)
@@ -145,52 +160,66 @@ int Graph::cover(char vertex, vector<char> order)
 		while (order[orderIndexTwo] != adj[adjRow][i])
 			++orderIndexTwo;
 		tempCover = abs(orderIndexTwo - orderIndexOne);
-		if (tempCover > cover)
+		if (cover < tempCover)
 			cover = tempCover;
 		orderIndexOne = 0;
 		orderIndexTwo = 0;
 	}
 	return cover;
 }
+
+string Graph::removeSpaces(string input)
+{
+	input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
+	return input;
+}
+
 int main()
 {
-	int maxCover = 0;
-	int minMaxCover = 27;
 	int numGraphs = 0;
-	vector<char> perm;
+	int numVertices = 0;
+	int maxCover = 0;
+	int minMaxCover = 0;
+	vector<char> permutation;
 	vector<char> order;
-	Graph foo(0);
-//	cout << "Input number of graphs: ";
+
+	ifstream inFile;
+	inFile.open("input.txt");
+
 	cin >> numGraphs;
 	for (int i = 0; i < numGraphs; ++i)
 	{
-		foo.fillGraph();
-		foo.fillVector(perm);
-		sort(perm.begin(), perm.end());
+		cin >> numVertices;
+		Graph foo(numVertices);
+		foo.fillGraph(inFile);
+		foo.fillVector(permutation);
+		foo.printGraph();
+		minMaxCover = permutation.size() + 1;
+		sort(permutation.begin(), permutation.end());
 		do
 		{
-			maxCover = foo.maxCover(perm);
+			maxCover = foo.maxCover(permutation);
 			if (maxCover < minMaxCover)
 			{
 				minMaxCover = maxCover;
-				order = perm;
+				order = permutation;
 			}
-			else if (maxCover = minMaxCover)
+			else if (maxCover == minMaxCover  && order > permutation)
 			{
-				if (perm < order)
-					order = perm;
+				order = permutation;
 			}
 
-		} while (next_permutation(perm.begin(), perm.end()));
+		} while (next_permutation(permutation.begin(), permutation.end()));
 
-		for (int i = 0; i < order.size(); ++i)
-			cout << order[i] << " ";
+		for (char temp : order)
+		{
+			cout << temp << " ";
+		}
 		cout << minMaxCover << endl;
-		maxCover = 0;
-		minMaxCover = 27;
 		order.clear();
-		perm.clear();
+		permutation.clear();
 	}
+	inFile.close();
 	system("pause");
 	return 0;
 }
