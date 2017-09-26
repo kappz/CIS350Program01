@@ -1,7 +1,7 @@
 /*
 Author: Peter O'Donohue
 Creation Date: 09/18/17
-Modification Date: 09/25/17
+Modification Date: 09/26/17
 Description: FILL IN
 */
 
@@ -52,8 +52,7 @@ class Graph
 {
 public:
 	Graph(int size); // creates an empty graph with size vertices
-	void fillGraph(ifstream& inputFile); // fills in the graph from cin
-	string removeSpaces(string input);
+	void fillGraph(); // fills in the graph from cin
 	void fillVector(vector<char>& order);
 	void printGraph(); // prints the graph (for debugging only)
 	int maxCover(vector<char> order); // returns the maxCover for the
@@ -77,7 +76,7 @@ Graph::Graph(int size)
 				adj[i][j] = '?';
 			}
 }
-void Graph::fillGraph(ifstream& inputFile)
+void Graph::fillGraph()
 {
 	int numAdjacent = 0;
 	char vertex = ' ';
@@ -94,11 +93,12 @@ void Graph::fillGraph(ifstream& inputFile)
 	default:
 		for (int i = 0; i < adj.numrows(); ++i)
 		{
-			cin >> vertex >> numAdjacent >> adjacencies;
+			cin >> vertex >> numAdjacent;
+			getline(cin, adjacencies);
 			if (numAdjacent >= adj.numrows())
 				numAdjacent = adj.numrows() - 1;
-
 			vertex = toupper(vertex);
+			adjacencies.erase(remove_if(adjacencies.begin(), adjacencies.end(), isspace), adjacencies.end());
 			transform(adjacencies.begin(), adjacencies.end(), adjacencies.begin(), ::toupper);
 			adj[i].resize(numAdjacent + 1);
 			adj[i][0] = vertex;
@@ -168,12 +168,6 @@ int Graph::cover(char vertex, vector<char> order)
 	return cover;
 }
 
-string Graph::removeSpaces(string input)
-{
-	input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
-	return input;
-}
-
 int main()
 {
 	int numGraphs = 0;
@@ -183,17 +177,16 @@ int main()
 	vector<char> permutation;
 	vector<char> order;
 
-	ifstream inFile;
-	inFile.open("input.txt");
+//	ifstream inFile;
+//	inFile.open("input.txt");
 
 	cin >> numGraphs;
 	for (int i = 0; i < numGraphs; ++i)
 	{
 		cin >> numVertices;
 		Graph foo(numVertices);
-		foo.fillGraph(inFile);
+		foo.fillGraph();
 		foo.fillVector(permutation);
-		foo.printGraph();
 		minMaxCover = permutation.size() + 1;
 		sort(permutation.begin(), permutation.end());
 		do
@@ -219,7 +212,7 @@ int main()
 		order.clear();
 		permutation.clear();
 	}
-	inFile.close();
-	system("pause");
+//	inFile.close();
+// system("pause");
 	return 0;
 }

@@ -1,10 +1,46 @@
-1
+7
 8
-A2B F
-B3AGC
-C2BD
-D3CGE
-E2DH
-F3AGH
-G3BFD
-H2FE
+A 2 B F
+B 3 A G C
+C 2 B D
+D 3 C G E
+E 2 D H
+F 3 A G H
+G 3 B F D
+H 2 F E
+8
+a 2 b f
+b 3 a g c
+c 2 b d
+d 3 c g e
+E 2 H D
+f 3 a g h
+g 3 b f d
+h 2 f e
+3
+x 2 y z
+y 1 x
+z 1 x
+1
+a 0
+3
+a 2 b c
+c 1 a
+b 1 a
+3
+b 1 a
+c 1 a
+a 2 b c
+9
+a 8 b c d e f g h i j k l m n
+b 1 a
+c 1 a
+d 1 a
+e 1 a
+f 1 a
+g 1 a
+h 1 a
+i 1 a
+
+
+
