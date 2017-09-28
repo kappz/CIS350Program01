@@ -9,6 +9,7 @@ Description: FILL IN
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 using namespace std;
 
@@ -51,11 +52,10 @@ class Graph
 {
 public:
 	Graph(int size); // creates an empty graph with size vertices
-	void fillGraph(); // fills in the graph from cin
+	void fillGraph(ifstream& inputFile); // fills in the graph from cin
 	void fillVector(vector<char>& order);
-	string removeSpaces(string withSpaces);
-	string capAll(string nonCapital);
 	void printGraph(); // prints the graph (for debugging only)
+	string removeSpaces(string withSpaces);
 	int maxCover(vector<char> order); // returns the maxCover for the
 									  // ordering order
 	int cover(char vertex, vector<char> order); // returns the cover size for vertex
@@ -77,7 +77,7 @@ Graph::Graph(int size)
 			adj[i][j] = '?';
 		}
 }
-void Graph::fillGraph()
+void Graph::fillGraph(ifstream& inputFile)
 {
 	int numAdjacent = 0;
 	char vertex = ' ';
@@ -85,7 +85,7 @@ void Graph::fillGraph()
 
 	if (adj.numrows() == 1)
 	{
-		cin >> vertex >> numAdjacent;
+		inputFile >> vertex >> numAdjacent;
 		vertex = toupper(vertex);
 		adj[0][0] = vertex;
 	}
@@ -93,10 +93,9 @@ void Graph::fillGraph()
 	{
 		for (int i = 0; i < adj.numrows(); ++i)
 		{
-			cin >> vertex >> numAdjacent;
-			getline(cin, adjacencies);
+			inputFile >> vertex >> numAdjacent;
+			getline(inputFile, adjacencies);
 			adjacencies = removeSpaces(adjacencies);
-			adjacencies = capAll(adjacencies);
 			if (numAdjacent >= adj.numrows())
 				numAdjacent = adj.numrows() - 1;
 			vertex = toupper(vertex);
@@ -109,7 +108,6 @@ void Graph::fillGraph()
 		}
 	}
 }
-
 void Graph::fillVector(vector<char>& order)
 {
 	for (int i = 0; i < adj.numrows(); ++i)
@@ -117,45 +115,28 @@ void Graph::fillVector(vector<char>& order)
 		order.push_back(adj[i][0]);
 	}
 }
-
-string Graph::removeSpaces(string withSpaces)
+string Graph::removeSpaces(string hasSpaces)
 {
+	char transfer = ' ';
 	string noSpaces = "";
-	for (int i = 0; i < withSpaces.length(); ++i)
-	{
-		if (withSpaces.at(i) != ' ')
+	for (int i = 0; i < hasSpaces.length(); ++i)
+		if (hasSpaces.at(i) != ' ')
 		{
-			noSpaces = noSpaces + withSpaces.at(i);
+			transfer = toupper(hasSpaces.at(i));
+			noSpaces += transfer;
 		}
-	}
 	return noSpaces;
 }
-
-string Graph::capAll(string nonCapital)
-{
-	string capital = "";
-	char capitalChar = ' ';
-	for (int i = 0; i < nonCapital.length(); ++i)
-	{
-		capitalChar = nonCapital.at(i);
-		capitalChar = toupper(capitalChar);
-		capital = capital + capitalChar;
-	}
-	return capital;
-}
-
 void Graph::printGraph()
 {
+
 	for (int i = 0; i < adj.numrows(); ++i)
-	{
 		for (int j = 0; j < adj[i].size(); ++j)
 		{
 			cout << adj[i][j] << " ";
 		}
-		cout << endl;
-	}
+	cout << endl;
 }
-
 int Graph::maxCover(vector<char> order)
 {
 	int max = 0;
@@ -200,15 +181,16 @@ int main()
 	int numVertices = 0;
 	int maxCover = 0;
 	int minMaxCover = 0;
-	vector<char> permutation;
 	vector<char> order;
-
-	cin >> numGraphs;
+	vector<char> permutation;
+	ifstream inFile;
+	inFile.open("input.txt");
+	inFile >> numGraphs;
 	for (int i = 0; i < numGraphs; ++i)
 	{
-		cin >> numVertices;
+		inFile >> numVertices;
 		Graph foo(numVertices);
-		foo.fillGraph();
+		foo.fillGraph(inFile);
 		foo.fillVector(permutation);
 		minMaxCover = permutation.size() + 1;
 		sort(permutation.begin(), permutation.end());
@@ -235,5 +217,6 @@ int main()
 		order.clear();
 		permutation.clear();
 	}
+	system("pause");
 	return 0;
 }
