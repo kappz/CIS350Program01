@@ -1,7 +1,7 @@
 /*
 Author: Peter O'Donohue
 Creation Date: 09/18/17
-Modification Date: 09/26/17
+Modification Date: 09/28/17
 Description: FILL IN
 */
 
@@ -9,7 +9,6 @@ Description: FILL IN
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <fstream>
 
 using namespace std;
 
@@ -24,9 +23,9 @@ public:
 	}
 	void resize(int rows, int cols)
 	{
-		array.resize(rows);
-		for (int i = 0; i < rows; i++)
-			array[i].resize(cols);
+array.resize(rows);
+for (int i = 0; i < rows; i++)
+	array[i].resize(cols);
 	}
 	const vector<Object> & operator[](int row) const
 	{
@@ -54,6 +53,8 @@ public:
 	Graph(int size); // creates an empty graph with size vertices
 	void fillGraph(); // fills in the graph from cin
 	void fillVector(vector<char>& order);
+	string removeSpaces(string withSpaces);
+	string capAll(string nonCapital);
 	void printGraph(); // prints the graph (for debugging only)
 	int maxCover(vector<char> order); // returns the maxCover for the
 									  // ordering order
@@ -70,11 +71,11 @@ Graph::Graph(int size)
 		size = 26;
 	else
 		adj.resize(size, size);
-		for (int i = 0; i < size; ++i)
-			for (int j = 0; j < size; ++j)
-			{
-				adj[i][j] = '?';
-			}
+	for (int i = 0; i < size; ++i)
+		for (int j = 0; j < size; ++j)
+		{
+			adj[i][j] = '?';
+		}
 }
 void Graph::fillGraph()
 {
@@ -82,24 +83,23 @@ void Graph::fillGraph()
 	char vertex = ' ';
 	string adjacencies = "";
 
-	switch (adj.numrows())
+	if (adj.numrows() == 1)
 	{
-	case 1:
 		cin >> vertex >> numAdjacent;
 		vertex = toupper(vertex);
 		adj[0][0] = vertex;
-		break;
-
-	default:
+	}
+	else
+	{
 		for (int i = 0; i < adj.numrows(); ++i)
 		{
 			cin >> vertex >> numAdjacent;
 			getline(cin, adjacencies);
+			adjacencies = removeSpaces(adjacencies);
+			adjacencies = capAll(adjacencies);
 			if (numAdjacent >= adj.numrows())
 				numAdjacent = adj.numrows() - 1;
 			vertex = toupper(vertex);
-			adjacencies.erase(remove_if(adjacencies.begin(), adjacencies.end(), isspace), adjacencies.end());
-			transform(adjacencies.begin(), adjacencies.end(), adjacencies.begin(), ::toupper);
 			adj[i].resize(numAdjacent + 1);
 			adj[i][0] = vertex;
 			for (int j = 0; j < numAdjacent; ++j)
@@ -107,7 +107,6 @@ void Graph::fillGraph()
 				adj[i][j + 1] = adjacencies.at(j);
 			}
 		}
-		break;
 	}
 }
 
@@ -118,6 +117,33 @@ void Graph::fillVector(vector<char>& order)
 		order.push_back(adj[i][0]);
 	}
 }
+
+string Graph::removeSpaces(string withSpaces)
+{
+	string noSpaces = "";
+	for (int i = 0; i < withSpaces.length(); ++i)
+	{
+		if (withSpaces.at(i) != ' ')
+		{
+			noSpaces = noSpaces + withSpaces.at(i);
+		}
+	}
+	return noSpaces;
+}
+
+string Graph::capAll(string nonCapital)
+{
+	string capital = "";
+	char capitalChar = ' ';
+	for (int i = 0; i < nonCapital.length(); ++i)
+	{
+		capitalChar = nonCapital.at(i);
+		capitalChar = toupper(capitalChar);
+		capital = capital + capitalChar;
+	}
+	return capital;
+}
+
 void Graph::printGraph()
 {
 	for (int i = 0; i < adj.numrows(); ++i)
@@ -177,9 +203,6 @@ int main()
 	vector<char> permutation;
 	vector<char> order;
 
-//	ifstream inFile;
-//	inFile.open("input.txt");
-
 	cin >> numGraphs;
 	for (int i = 0; i < numGraphs; ++i)
 	{
@@ -212,7 +235,5 @@ int main()
 		order.clear();
 		permutation.clear();
 	}
-//	inFile.close();
-// system("pause");
 	return 0;
 }
